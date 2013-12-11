@@ -1,0 +1,140 @@
+package gyyzp.avg;
+
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Frame;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+
+
+public class AVGFrame extends Frame implements Runnable {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 198284399945549558L;
+
+	private IAVG avg;
+
+	private AVGCanvas canvas;
+
+	private boolean fps;
+
+	private String titleName;
+
+	private Thread mainLoop;
+
+	public AVGFrame(String titleName, int width, int height) {
+		this(new AVG(), titleName, width, height);
+	}
+
+	public AVGFrame(IAVG avg, String titleName, int width, int height) {
+		super(titleName);
+		Lib.WIDTH = width;
+		Lib.HEIGHT = height;
+		this.avg = avg;
+		this.titleName = titleName;
+
+		this.setPreferredSize(new Dimension(width + 5, height + 25));
+		this.initCanvas(Lib.WIDTH, Lib.HEIGHT);
+		this.pack();
+		this.addWindowListener(new WindowAdapter() {
+			public void windowClosing(WindowEvent e) {
+				System.exit(0);
+			}
+		});
+		this.setResizable(false);
+		this.setLocationRelativeTo(null);
+		this.setVisible(true);
+	}
+
+	public void run() {
+		gameLoop();
+	}
+
+	/**
+	 * 开始循环窗体图像
+	 * 
+	 */
+	private synchronized void gameLoop() {
+		canvas.startPaint();
+		long second = 0L;
+		int moveCount = 0;
+		// 循环绘制
+		for (;;) {
+			long start = System.currentTimeMillis();
+			this.paintScreen();
+			long end = System.currentTimeMillis();
+			long time = end - start;
+			long sleepTime = 20L - time;
+			if (sleepTime < 0L)
+				sleepTime = 0L;
+			try {
+				Thread.sleep(sleepTime);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			if (this.fps) {
+				moveCount++;
+				second += System.currentTimeMillis() - start;
+				if (second >= 1000L) {
+					this.setTitle(new StringBuilder(titleName).append(" FPS:")
+							.append(moveCount).toString());
+					moveCount = 0;
+					second = 0L;
+				}
+			}
+		}
+	}
+
+	/**
+	 * 启动游戏循环
+	 * 
+	 */
+	public void mainLoop() {
+		this.mainLoop = new Thread(this);
+		this.mainLoop.start();
+	}
+
+	/**
+	 * 初始化背景帆布
+	 * 
+	 * @param width
+	 * @param height
+	 */
+	private void initCanvas(final int width, final int height) {
+		canvas = new AVGCanvas(avg);
+		canvas.setBackground(Color.black);
+		canvas.setPreferredSize(new Dimension(width, height));
+		this.add(canvas);
+	}
+
+	public IAVG getAVG() {
+		return this.avg;
+	}
+
+	protected void processWindowEvent(WindowEvent e) {
+		super.processWindowEvent(e);
+	}
+
+	public synchronized void paintScreen() {
+		canvas.repaint();
+	}
+
+	public boolean isShowFPS() {
+		return fps;
+	}
+
+	public void setShowFPS(boolean fps) {
+		this.fps = fps;
+	}
+
+	public Thread getMainLoop() {
+		return mainLoop;
+	}
+
+	public String getTitleName() {
+		return titleName;
+	}
+
+}
