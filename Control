@@ -1,0 +1,60 @@
+package gyyzp.avg;
+
+import java.awt.Point;
+import java.awt.event.MouseEvent;
+import java.util.Random;
+
+
+public abstract class Control implements IControl {
+
+	public static Point mouse = new Point(0, 0);
+	
+	public static Random rand = new Random();
+	
+	public static boolean left_click;
+
+	public static boolean right_click;
+	
+	public static boolean fg_click;
+
+	public Control() {
+	}
+
+	public void mouseClicked(MouseEvent e) {
+	}
+
+	public void mousePressed(MouseEvent e) {
+		if (e.getButton() == 1) {
+			Control.left_click = true;
+		}
+		if (e.getButton() == 3) {
+			Control.right_click = true;
+		}
+	}
+
+	public void mouseReleased(MouseEvent e) {
+		if (e.getButton() == 1) {
+			Control.left_click = false;
+		}
+		if (e.getButton() == 3) {
+			Control.right_click = false;
+		}
+	}
+
+	public void mouseEntered(MouseEvent e) {
+	}
+
+	public void mouseExited(MouseEvent e) {
+	}
+
+	public void mouseDragged(MouseEvent e) {
+		mouse = e.getPoint();
+	}
+
+	public void mouseMoved(MouseEvent e) {
+		mouse = e.getPoint();
+	}
+
+
+
+}
