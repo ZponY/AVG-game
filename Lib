@@ -1,0 +1,15 @@
+package gyyzp.avg;
+public class Lib {
+	
+	public static String fontName = "华文新魏"; 
+	
+	public static String encoding = "utf-8";
+
+	public static int WIDTH = 480;
+
+	public static int HEIGHT = 360;
+
+	public static int FONT = 18;
+
+	public static int FONT_SIZE = 2;
+}
