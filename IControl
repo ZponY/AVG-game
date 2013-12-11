@@ -1,0 +1,14 @@
+package gyyzp.avg;
+
+import java.awt.Graphics;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
+
+public interface IControl extends MouseListener, MouseMotionListener
+		 {
+
+	public abstract void draw(final Graphics g);
+
+	public abstract IControl invoke();
+
+}
