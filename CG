@@ -1,0 +1,45 @@
+package gyyzp.script;
+
+import gyyzp.utils.ArrayMap;
+
+import java.awt.Image;
+
+
+
+public class CG {
+
+	private static ArrayMap charas = new ArrayMap(100);
+
+	private Image backgroundCG;
+
+	public Image getBackgroundCG() {
+		return backgroundCG;
+	
+	}
+
+	public void setBackgroundCG(Image backgroundCG) {
+		this.backgroundCG = backgroundCG;
+	}
+	
+	public void addImage(String file, int x, int y) {
+		charas.put(file, new Chara(file, x, y));
+	}
+
+	public void removeImage(String file) {
+		charas.remove(file);
+	}
+	
+	public void clear() {
+		charas.clear();
+	}
+	
+	public ArrayMap getCharas() {
+		return charas;
+	}
+
+	public static void setCharas(ArrayMap charas) {
+		CG.charas = charas;
+	}
+
+
+}
