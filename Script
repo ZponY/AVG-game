@@ -1,0 +1,482 @@
+package gyyzp.script;
+
+import gyyzp.avg.Control;
+import gyyzp.avg.IControl;
+import gyyzp.avg.Lib;
+import gyyzp.message.Message;
+import gyyzp.message.MessageDialog;
+import gyyzp.start.Title;
+import gyyzp.utils.Utility;
+
+import java.awt.Color;
+import java.awt.Graphics;
+import java.awt.Image;
+import java.awt.event.MouseEvent;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.util.StringTokenizer;
+
+
+
+public class Script extends Control {
+	/**
+	 * 
+	 */
+
+
+	private CG cg = new CG();
+
+	private MessageDialog dialog = new MessageDialog();
+
+	private int stringMaxLine = 8;
+
+	private Image screen;
+
+	private Image dialogImage;
+
+	private String[] messages;
+
+	private int[] flags;
+
+	private Color color;
+
+	private int sleep;
+
+	private String[] scriptContent;
+
+	private boolean isMessage;
+
+	private boolean isMessageEnd;
+
+	private String scriptName;
+
+	private String nextName;
+
+	private int selectFlag = 0;
+
+	private Graphics graphics;
+
+	private boolean isClick;
+
+	private int scriptNo;
+
+	private int shakeNumber;
+
+
+
+	private boolean isOver;
+
+	public Script(final String initscript) {
+		Message.freeImage();
+		screen = Utility.createImage(Lib.WIDTH, Lib.HEIGHT, true);
+		graphics = screen.getGraphics();
+		dialogImage = dialog.getImageDialog();
+		initialize(initscript);
+		runScript(scriptName);
+	}
+
+	private synchronized void initialize(final String initscript) {
+		scriptName = initscript;
+		shakeNumber = 0;
+		sleep = 0;
+		selectFlag = 0;
+		scriptNo = 0;
+		shakeNumber = -1;
+		isClick = false;
+		isMessageEnd = false;
+		isMessage = false;
+		nextName = null;
+		scriptContent = new String[4096];
+		messages = new String[stringMaxLine];
+		flags = new int[stringMaxLine];
+	}
+
+	public void update(Graphics g) {
+		draw(g);
+	}
+
+	public void draw(final Graphics g) {
+		if (sleep <= 0) {
+			if (cg.getBackgroundCG() != null) {
+				if (shakeNumber > 0) {
+					graphics.drawImage(cg.getBackgroundCG(), shakeNumber / 2
+							- Control.rand.nextInt(shakeNumber), shakeNumber
+							/ 2 - Control.rand.nextInt(shakeNumber), null);
+				} else {
+					graphics.drawImage(cg.getBackgroundCG(), 0, 0, null);
+				}
+			}
+			for (int i = 0; i < cg.getCharas().size(); i++) {
+				Chara chara = (Chara) cg.getCharas().get(i);
+				graphics.drawImage(chara.getCharacterCG(), chara.getX(), chara
+						.getY(), null);
+			}
+			if (isMessage) {
+				dialog.showDialog(dialogImage, graphics);
+				for (int i = 0; i < stringMaxLine; i++) {
+					graphics.setColor(Color.black);
+					for (int j = 0; j < messages[i].length(); j++) {
+						Utility.drawString(messages[i].substring(j, j + 1)
+								.toString(), Lib.fontName, graphics, Lib.FONT
+								* j + dialog.getMESSAGE_LINE_X() + 2, i
+								* (Lib.FONT + Lib.FONT_SIZE) + Lib.FONT + 1
+								+ dialog.getMESSAGE_LINE_Y(), 1);
+					}
+
+					if (flags[selectFlag] != -1) {
+						graphics.setColor(Color.white);
+						for (int j1 = 0; j1 < messages[selectFlag].length(); j1++) {
+							Utility.drawString(messages[selectFlag].substring(
+									j1, j1 + 1).toString(), Lib.fontName,
+									graphics, Lib.FONT * j1
+											+ dialog.getMESSAGE_LINE_X(),
+									selectFlag * (Lib.FONT + Lib.FONT_SIZE)
+											+ Lib.FONT
+											+ dialog.getMESSAGE_LINE_Y(), 1);
+
+						}
+						dialog.showDialog(selectFlag, Lib.FONT, Lib.FONT_SIZE,
+								dialogImage, graphics);
+					}
+					if (flags[i] == -1) {
+						graphics.setColor(Color.white);
+					} else {
+						graphics.setColor(Color.gray);
+					}
+					for (int count = 0; count < messages[i].length(); count++) {
+						Utility.drawString(messages[i].substring(count,
+								count + 1).toString(), Lib.fontName, graphics,
+								Lib.FONT * count + dialog.getMESSAGE_LINE_X(),
+								i * (Lib.FONT + Lib.FONT_SIZE) + Lib.FONT
+										+ dialog.getMESSAGE_LINE_Y(), 1);
+					}
+				}
+			}
+		} else {
+			sleep--;
+			if (color != null) {
+				graphics.setColor(color);
+				graphics.fillRect(0, 0, Lib.WIDTH, Lib.HEIGHT);
+				Utility.wait(20);
+			}
+		}
+		// 设置背景
+		g.drawImage(screen, 0, 0, null);
+		g.dispose();
+
+	}
+
+	public void mousePressed(MouseEvent e) {
+		super.mousePressed(e);
+		if (!isMessageEnd && Control.left_click && sleep <= 0) {
+			if (!isMessage) {
+				isMessage = true;
+			}
+			scriptNo = nextScript(scriptNo, scriptName);
+		} else if (isClick && Control.left_click) {
+			if (flags[selectFlag] != -1) {
+				nextScript(flags[selectFlag]);
+			}
+			return;
+		}
+
+	}
+
+	public void mouseMoved(MouseEvent e) {
+		super.mouseMoved(e);
+		if (!isMessage) {
+			return;
+		}
+		if (nextName != null) {
+			return;
+		}
+		int count = (mouse.y - dialog.getMESSAGE_LINE_Y())
+				/ (Lib.FONT + Lib.FONT_SIZE);
+		if (count < 0) {
+			return;
+		}
+		if (count >= stringMaxLine) {
+			return;
+		}
+		if (flags[count] != -1) {
+			isClick = true;
+		}
+		selectFlag = count;
+	}
+
+	/**
+	 * 移动脚本事件
+	 * 
+	 * @param i
+	 * @param s
+	 * @return
+	 */
+	private synchronized int nextScript(final int index, final String s) {
+		isClick = false;
+		if (isMessageEnd) {
+			return 0;
+		}
+		int j = 0;
+		int count = 0;
+		for (int i1 = 0; i1 < stringMaxLine; i1++) {
+			messages[i1] = "";
+			flags[i1] = -1;
+		}
+		for (j = index; j < scriptContent.length; j++) {
+			String messageFlag = null;
+			String objectFlag = null;
+			String orderFlag = null;
+			String gotoFlag = null;
+			if (scriptContent[j] == null) {
+				break;
+			}
+			if (scriptContent[j].length() == 0 && !isMessageEnd) {
+				messages[count] = " ";
+				flags[count] = -1;
+				if (++count == stringMaxLine) {
+					break;
+				}
+				continue;
+			}
+			if (scriptContent[j].length() == 0 && isMessageEnd
+					|| scriptContent[j].charAt(0) == '*'
+					|| scriptContent[j].charAt(0) == '#'
+					|| scriptContent[j].charAt(0) == '/')
+				continue;
+			StringTokenizer stringtokenizer = new StringTokenizer(
+					scriptContent[j]);
+			if (stringtokenizer.hasMoreTokens()) {
+				messageFlag = stringtokenizer.nextToken();
+			}
+			if (stringtokenizer.hasMoreTokens()) {
+				objectFlag = stringtokenizer.nextToken();
+			}
+			if (stringtokenizer.hasMoreTokens()) {
+				orderFlag = stringtokenizer.nextToken();
+			}
+			if (stringtokenizer.hasMoreTokens()) {
+				gotoFlag = stringtokenizer.nextToken();
+			}
+			if (messageFlag.equalsIgnoreCase("wait")) {
+				isMessage = true;
+				break;
+			}
+			if (messageFlag.equalsIgnoreCase("mes")) {
+				isMessage = true;
+				String[] temp = objectFlag.split("&");
+				for (int i = 0; i < temp.length; i++) {
+					messages[i] = temp[i].replaceAll("_"," ");
+				}
+				flags[count] = -1;
+				if (++count == stringMaxLine) {
+					break;
+				}
+				break;
+			}
+			if (messageFlag.equalsIgnoreCase("shake")) {
+				shakeNumber = Integer.valueOf(objectFlag).intValue();
+				continue;
+			}
+			if (messageFlag.equalsIgnoreCase("cgwait")) {
+				isMessage = false;
+				break;
+			}
+			if (messageFlag.equalsIgnoreCase("sleep")) {
+				sleep = Integer.valueOf(objectFlag).intValue();
+				isMessage = false;
+				break;
+			}
+			if (messageFlag.equalsIgnoreCase("flash")) {
+				String[] colors = objectFlag.split(",");
+				if (color == null && colors != null && colors.length == 3) {
+					color = new Color(Integer.valueOf(colors[0]).intValue(),
+							Integer.valueOf(colors[1]).intValue(), Integer
+									.valueOf(colors[2]).intValue());
+					sleep = 20;
+					isMessage = false;
+				} else {
+					color = null;
+				}
+				break;
+			}
+			if (messageFlag.equalsIgnoreCase("game")) {
+				isMessage = false;
+				continue;
+			}
+			if (messageFlag.equalsIgnoreCase("over")) {
+				isOver = true;
+				isMessage = false;
+				continue;
+			}
+			if (messageFlag.equalsIgnoreCase("gb")) {
+				if (objectFlag == null) {
+					return index;
+				}
+				if (objectFlag.equalsIgnoreCase("none")) {
+					cg.setBackgroundCG(null);
+				} else {
+					cg.setBackgroundCG(Utility.loadImage(objectFlag));
+				}
+				continue;
+			}
+			if (messageFlag.equalsIgnoreCase("cg")) {
+				if (objectFlag == null) {
+					return index;
+				}
+				if (objectFlag.equalsIgnoreCase("del")) {
+					if (orderFlag != null) {
+						cg.removeImage(orderFlag);
+					} else {
+						cg.clear();
+					}
+				} else {
+					int x = 0, y = 0;
+					if (orderFlag != null) {
+						x = Integer.parseInt(orderFlag);
+					}
+					if (gotoFlag != null) {
+						y = Integer.parseInt(gotoFlag);
+					}
+					cg.addImage(objectFlag, x, y);
+				}
+				continue;
+			}
+			if (messageFlag.equalsIgnoreCase("if")) {
+				if (objectFlag == null) {
+					return index;
+				}
+				isMessageEnd = true;
+				if (orderFlag != null && !validFlag(orderFlag))
+					continue;
+				messages[count] = objectFlag;
+				flags[count] = j;
+				if (++count == stringMaxLine) {
+					break;
+				}
+				continue;
+			}
+			if (messageFlag.equalsIgnoreCase("go")) {
+				nextName = objectFlag;
+				isMessageEnd = true;
+				break;
+			}
+			if (messageFlag.equalsIgnoreCase("end")) {
+				isMessageEnd = true;
+				break;
+			}
+			if (isMessageEnd) {
+				continue;
+			}
+		}
+		return j + 1;
+	}
+
+	/**
+	 * 移动脚本事件
+	 * 
+	 * @param index
+	 */
+	private synchronized void nextScript(final int index) {
+		String s = null;
+		String objectFlag = null;
+		// 在最大脚本范围内循环
+		for (int j = index + 1; j < scriptContent.length; j++) {
+			// 分解脚本
+			StringTokenizer stringtokenizer = new StringTokenizer(
+					scriptContent[j]);
+			if (stringtokenizer.hasMoreTokens()) {
+				s = stringtokenizer.nextToken();
+			}
+			if (stringtokenizer.hasMoreTokens()) {
+				objectFlag = stringtokenizer.nextToken();
+			}
+			if (s == null || objectFlag == null) {
+				return;
+			}
+			if (validFlag(s)) {
+				initialize(objectFlag);
+				runScript(objectFlag); // 加载指定脚本
+				return;
+			}
+		}
+
+	}
+
+	/**
+	 * 加载脚本
+	 * 
+	 * @param s
+	 */
+	private synchronized void runScript(final String file) {
+		boolean choice = false;
+		if (file == null) {
+			return;
+		}
+		try {
+			InputStreamReader inputstreamreader = new InputStreamReader(Utility
+					.getResource(file), Lib.encoding);
+			BufferedReader bufferedreader = new BufferedReader(
+					inputstreamreader);
+			for (int i = 0; i < scriptContent.length; i++) {
+				String content = bufferedreader.readLine();
+				if (content == null) {
+					break;
+				}
+				int count = content.length() / dialog.getLINE();
+				StringTokenizer stringtokenizer = new StringTokenizer(content);
+				String orderFlag;
+				if (stringtokenizer.hasMoreTokens()) {
+					orderFlag = stringtokenizer.nextToken();
+				} else {
+					orderFlag = null;
+				}
+				if (orderFlag != null) {
+					count = 0;
+					if (orderFlag.equalsIgnoreCase("if")) {
+						choice = true;
+					}
+				}
+				if (count == 0 || choice) {
+					scriptContent[i] = content;
+				} else {
+					int l = 0;
+					do {
+						scriptContent[i] = content.substring(0, dialog
+								.getLINE());
+						content = content.substring(dialog.getLINE());
+						l++;
+						i++;
+					} while (l < count);
+					scriptContent[i] = content;
+				}
+				if (content.equalsIgnoreCase("end"))
+					break;
+			}
+			inputstreamreader.close();
+		} catch (Exception ex) {
+			ex.getStackTrace();
+			return;
+		}
+		nextScript(0, file);
+	}
+
+	/**
+	 * 对特殊标记进行检查
+	 * 
+	 * @param s
+	 * @return
+	 */
+	private boolean validFlag(String s) {
+		return s.equalsIgnoreCase("@");
+	}
+
+	/**
+	 * 转换控制器接口
+	 */
+	public IControl invoke() {
+		if (isOver) {
+			return new Title();
+		}
+		return this;
+	}
+}
