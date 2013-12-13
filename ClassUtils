@@ -1,0 +1,88 @@
+package gyyzp.utils;
+
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+
+public class ClassUtils {
+
+	final public static String initialUppercase(final String keyName) {
+		byte[] array = keyName.toLowerCase().getBytes();
+		array[0] = (byte) Character.toUpperCase((char) array[0]);
+		return new String(array);
+	}
+
+	public static void beanRegister(final Object object,
+			final String beanProperty, final String value) {
+		Object[] beanObject = beanMatch(object.getClass(), beanProperty);
+		Object[] cache = new Object[1];
+		Method getter = (Method) beanObject[0];
+		Method setter = (Method) beanObject[1];
+		try {
+			String methodType = getter.getReturnType().getName();
+			if (methodType.equalsIgnoreCase("long")) {
+				cache[0] = new Long(value);
+				setter.invoke(object, cache);
+			} else if (methodType.equalsIgnoreCase("int")
+					|| methodType.equalsIgnoreCase("integer")) {
+				cache[0] = new Integer(value);
+				setter.invoke(object, cache);
+			} else if (methodType.equalsIgnoreCase("short")) {
+				cache[0] = new Short(value);
+				setter.invoke(object, cache);
+			} else if (methodType.equalsIgnoreCase("float")) {
+				cache[0] = new Float(value);
+				setter.invoke(object, cache);
+			} else if (methodType.equalsIgnoreCase("double")) {
+				cache[0] = new Double(value);
+				setter.invoke(object, cache);
+			} else if (methodType.equalsIgnoreCase("boolean")) {
+				cache[0] = new Boolean(value);
+				setter.invoke(object, cache);
+			} else if (methodType.equalsIgnoreCase("java.lang.String")) {
+				cache[0] = value;
+				setter.invoke(object, cache);
+			} else if (methodType.equalsIgnoreCase("[Ljava.lang.String;")){
+				cache[0] = value.split(",");
+				setter.invoke(object, cache); 
+			} else if (methodType.equalsIgnoreCase("char")) {
+				cache[0] = (Character.valueOf(value.charAt(0)));
+				setter.invoke(object, cache);
+			}
+		} catch (Exception ex) {
+			throw new RuntimeException(beanProperty + " is " + ex.getMessage());
+		}
+	}
+
+	final static public Object[] beanMatch(final Class clazz,
+			final String beanProperty) {
+		Object[] result = new Object[2];
+		String nowPropertyName = ClassUtils.initialUppercase(beanProperty);
+		String names[] = { ("set" + nowPropertyName).intern(),
+				("get" + nowPropertyName).intern(),
+				("is" + nowPropertyName).intern(),
+				("write" + nowPropertyName).intern(),
+				("read" + nowPropertyName).intern() };
+		Method getter = null;
+		Method setter = null;
+		Method methods[] = clazz.getMethods();
+		for (int i = 0; i < methods.length; i++) {
+			Method method = methods[i];
+			if (!Modifier.isPublic(method.getModifiers()))
+				continue;
+			String methodName = method.getName().intern();
+			for (int j = 0; j < names.length; j++) {
+				String name = names[j];
+				if (!name.equals(methodName))
+					continue;
+				if (methodName.startsWith("set")
+						|| methodName.startsWith("read"))
+					setter = method;
+				else
+					getter = method;
+			}
+		}
+		result[0] = getter;
+		result[1] = setter;
+		return result;
+	}
+}
