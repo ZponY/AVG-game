@@ -1,0 +1,19 @@
+package gyyzp.start;
+
+import gyyzp.avg.AVGFrame;
+
+
+
+public class Main {
+
+	public static void main(String[] args) {
+		java.awt.EventQueue.invokeLater(new Runnable() {
+			public void run() {
+				AVGFrame frame = new AVGFrame("纯白恋爱史", 480, 360);
+			
+				frame.getAVG().setControl(new Title());
+				frame.mainLoop();
+			}
+		});
+	}
+}
