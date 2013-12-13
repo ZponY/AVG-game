@@ -1,0 +1,138 @@
+package gyyzp.start;
+
+import gyyzp.avg.Control;
+import gyyzp.avg.IControl;
+import gyyzp.avg.Lib;
+import gyyzp.message.Message;
+import gyyzp.script.Script;
+import gyyzp.utils.Utility;
+
+import java.awt.Color;
+import java.awt.Graphics;
+import java.awt.Image;
+import java.awt.event.MouseEvent;
+
+
+public class Title extends Control {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -2135917433215388192L;
+
+	// x1与x2,y1与y2成比例变换
+	private int MESSAGE_LINE_X1 = 155;
+
+	private int MESSAGE_LINE_Y1 = 205;
+	
+	private int MESSAGE_LINE_X2 = 335;
+
+	private int MESSAGE_LINE_Y2 = 335;
+
+	private int font = 18;
+
+	private int fontSize = 20;
+
+	private Image title = Utility.loadImage("system/title.png");
+
+	private String[] messages = new String[] { "开始游戏" };
+
+	private int left = 180;
+
+	private int top = 220;
+
+	Image screen = null;
+
+	private Graphics graphics = null;
+
+	private int selectFlag = 0;
+
+	private boolean select;
+
+	public Title() {
+		Message.freeImage();
+		screen = Utility.createImage(Lib.WIDTH, Lib.HEIGHT, true);
+		graphics = screen.getGraphics();
+	}
+
+	public void draw(Graphics g) {
+
+		graphics.drawImage(title, 0, 0, null);
+
+		Message.setWindowMessage(graphics, MESSAGE_LINE_X1, MESSAGE_LINE_Y1,
+				MESSAGE_LINE_X2, MESSAGE_LINE_Y2);
+
+		Message.setWindowFrame(graphics, MESSAGE_LINE_X1, MESSAGE_LINE_Y1,
+				MESSAGE_LINE_X2, MESSAGE_LINE_Y2);
+
+		for (int i = 0; i < messages.length; i++) {
+			// 选中
+			if (i == selectFlag) {
+				// 变更字体颜色。
+				graphics.setColor(Color.white);
+				// 设定浮标。
+				Message
+						.setWindowBuoyageMessage(selectFlag, 160, 34, graphics,
+								MESSAGE_LINE_X1, MESSAGE_LINE_Y1,
+								MESSAGE_LINE_X2 + fontSize + 2, MESSAGE_LINE_Y2
+										+ fontSize + 40);
+				// 未选中
+			} else {
+				graphics.setColor(Color.gray);
+			}
+			for (int k = 0; k < messages[i].length(); k++) {
+				Utility.drawDefaultString(messages[i].substring(k, k + 1).toString(), graphics, font * k + left, i
+								* (font + fontSize) + font + top, 1, font);
+				
+			}
+
+		}
+
+		g.drawImage(screen, 0, 0, null);
+		g.dispose();
+	}
+
+	public IControl invoke() {
+		if (left_click && select) {
+			switch (selectFlag) {
+			case 0:
+				// 启动脚本
+				return new Script("script/start.txt");
+			case 2:
+				// 退出
+				System.exit(0);
+				break;
+			}
+		}
+		return this;
+	}
+
+	public void mouseMoved(MouseEvent e) {
+		super.mouseMoved(e);
+		int k = (Control.mouse.y - top) / (font + fontSize);
+		if (k < 0) {
+			return;
+		}
+		if (k >= messages.length) {
+			return;
+		}
+		for (int l = 0; l < messages.length; l++) {
+			for (int i1 = 0; i1 < messages[l].length(); i1++) {
+				if (l == k) {
+					selectFlag = k;
+					continue;
+				}
+			}
+		}
+		if ((double) Control.mouse.x > this.MESSAGE_LINE_X1
+				&& (double) Control.mouse.x < this.MESSAGE_LINE_X1
+						+ (double) this.MESSAGE_LINE_X2
+				&& (double) Control.mouse.y > this.MESSAGE_LINE_Y1
+				&& (double) Control.mouse.y < this.MESSAGE_LINE_Y1
+						+ (double) this.MESSAGE_LINE_Y2) {
+			select = true;
+		} else {
+			select = false;
+		}
+	}
+
+}
