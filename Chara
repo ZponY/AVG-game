@@ -1,0 +1,52 @@
+package gyyzp.script;
+
+import gyyzp.utils.Utility;
+
+import java.awt.Image;
+
+
+public class Chara {
+
+	private Image characterCG;
+
+	private int x;
+
+	private int y;
+
+	public Chara(final String fileName,final int x,final int y) {
+		this.characterCG = Utility.loadImage(fileName);
+		this.x = x;
+		this.y = y;
+	}
+
+	public void free() {
+		characterCG = null;
+		x = 0;
+		y = 0;
+	}
+
+	public Image getCharacterCG() {
+		return characterCG;
+	}
+
+	public void setCharacterCG(Image characterCG) {
+		this.characterCG = characterCG;
+	}
+
+	public int getX() {
+		return x;
+	}
+
+	public void setX(int x) {
+		this.x = x;
+	}
+
+	public int getY() {
+		return y;
+	}
+
+	public void setY(int y) {
+		this.y = y;
+	}
+
+}
