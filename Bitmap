@@ -1,0 +1,53 @@
+package gyyzp.start;
+
+import gyyzp.utils.Utility;
+
+import java.awt.Graphics;
+import java.awt.Image;
+
+
+public class Bitmap {
+
+	Image image;
+
+	int x;
+
+	int y;
+
+	public Bitmap(String fileName) {
+		image = Utility.loadImage(fileName);
+	}
+
+	public void draw(Graphics g) {
+		g.drawImage(image, x, y, null);
+	}
+
+	public void setDrawXY(int x, int y) {
+		this.x = x;
+		this.y = y;
+	}
+
+	public Image getImage() {
+		return image;
+	}
+
+	public void setImage(Image image) {
+		this.image = image;
+	}
+
+	public int getDrawX() {
+		return x;
+	}
+
+	public void setDrawX(int x) {
+		this.x = x;
+	}
+
+	public int getDrawY() {
+		return y;
+	}
+
+	public void setDrawY(int y) {
+		this.y = y;
+	}
+}
