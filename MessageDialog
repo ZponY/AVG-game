@@ -1,0 +1,111 @@
+package gyyzp.message;
+
+import gyyzp.utils.Utility;
+
+import java.awt.Graphics;
+import java.awt.Image;
+
+
+
+public class MessageDialog {
+	private int MESSAGE_LINE_X1 = 5;
+
+	private int MESSAGE_LINE_Y1 = 260;
+
+	private int MESSAGE_LINE_X2 = 475;
+
+	private int MESSAGE_LINE_Y2 = 355;
+
+	private int MESSAGE_LINE_X = 15;
+
+	private int MESSAGE_LINE_Y = 268;
+
+	private boolean MESSAGE_FRAME = true;
+
+	private int LINE;
+
+	public Image getImageDialog(){
+		this.setLINE(MESSAGE_LINE_X2 - MESSAGE_LINE_X / 15);
+		return Message.getMessageImage(MESSAGE_LINE_X2-MESSAGE_LINE_X1,MESSAGE_LINE_Y2-MESSAGE_LINE_Y1);
+	}
+	
+	public void showDialog(int select,int font,int fontSize,Image screen,Graphics g){
+		Message.setWindowBuoyageMessage(select, (this.getMESSAGE_LINE_X2()-this.getMESSAGE_LINE_X1())/2, (font + fontSize)+5,
+				g, this.getMESSAGE_LINE_X(), select * (font + fontSize) + this.getMESSAGE_LINE_Y() 
+		);
+	}
+	
+	public void showDialog(Image screen,Graphics g){
+		Utility.setAlpha(g, 0.75f);
+		g.drawImage(screen, MESSAGE_LINE_X1, MESSAGE_LINE_Y1, null);
+		Utility.setAlpha(g, 1.0f);
+		  if (MESSAGE_FRAME){
+				Message.setWindowFrame( g, MESSAGE_LINE_X1, MESSAGE_LINE_Y1,
+						MESSAGE_LINE_X2, MESSAGE_LINE_Y2);
+		  }
+	}
+	
+	public int getLINE() {
+		return LINE;
+	}
+
+	public void setLINE(int line) {
+		LINE = line;
+	}
+
+	public boolean isMESSAGE_FRAME() {
+		return MESSAGE_FRAME;
+	}
+
+	public void setMESSAGE_FRAME(boolean message_frame) {
+		MESSAGE_FRAME = message_frame;
+	}
+
+	public int getMESSAGE_LINE_X() {
+		return MESSAGE_LINE_X;
+	}
+
+	public void setMESSAGE_LINE_X(int message_line_x) {
+		MESSAGE_LINE_X = message_line_x;
+	}
+
+	public int getMESSAGE_LINE_X1() {
+		return MESSAGE_LINE_X1;
+	}
+
+	public void setMESSAGE_LINE_X1(int message_line_x1) {
+		MESSAGE_LINE_X1 = message_line_x1;
+	}
+
+	public int getMESSAGE_LINE_X2() {
+		return MESSAGE_LINE_X2;
+	}
+
+	public void setMESSAGE_LINE_X2(int message_line_x2) {
+		MESSAGE_LINE_X2 = message_line_x2;
+	}
+
+	public int getMESSAGE_LINE_Y() {
+		return MESSAGE_LINE_Y;
+	}
+
+	public void setMESSAGE_LINE_Y(int message_line_y) {
+		MESSAGE_LINE_Y = message_line_y;
+	}
+
+	public int getMESSAGE_LINE_Y1() {
+		return MESSAGE_LINE_Y1;
+	}
+
+	public void setMESSAGE_LINE_Y1(int message_line_y1) {
+		MESSAGE_LINE_Y1 = message_line_y1;
+	}
+
+	public int getMESSAGE_LINE_Y2() {
+		return MESSAGE_LINE_Y2;
+	}
+
+	public void setMESSAGE_LINE_Y2(int message_line_y2) {
+		MESSAGE_LINE_Y2 = message_line_y2;
+	}
+}
