@@ -1,0 +1,128 @@
+package gyyzp.utils;
+public class SimpleArray {
+
+	private StringBuffer stringArray = null;
+
+	public SimpleArray(int start, int end) {
+		stringArray = new StringBuffer();
+		for (int i = 0; i <= end; i++) {
+			stringArray.append(i);
+			stringArray.append(",");
+		}
+		String result = stringArray.toString();
+		stringArray = new StringBuffer(result.substring(0, result.length() - 1));
+	}
+
+	public SimpleArray() {
+		this.stringArray = new StringBuffer();
+	}
+
+	public SimpleArray(String content) {
+		this.stringArray = new StringBuffer(content);
+	}
+
+	public String all() {
+		if (stringArray == null)
+			return null;
+		String result = stringArray.toString();
+		if (result.endsWith(",")) {
+			result = result.substring(0, result.length() - 1);
+		}
+		return result.length() > 0 ? result : null;
+	}
+
+	public String value() {
+		return (all() == null) ? null : all().replaceAll(",", "");
+	}
+
+	public String pop() {
+		if (stringArray == null) {
+			return null;
+		}
+		String result = stringArray.toString();
+		int index = result.indexOf(",");
+		if (index != -1) {
+			String[] s = result.split(",");
+			stringArray = new StringBuffer(result.substring(index + 1, result
+					.length()));
+			result = s[0];
+		} else {
+			stringArray = new StringBuffer("");
+		}
+
+		return result;
+	}
+
+	public String[] popAll() {
+		if (stringArray == null) {
+			return null;
+		}
+		String result = stringArray.toString();
+		return result.split(",");
+	}
+
+	public String delete(int index) {
+		String value = String.valueOf(index);
+		StringBuffer sbr = new StringBuffer();
+		String[] s = stringArray.toString().split(",");
+		boolean isIn = false;
+		for (int i = 0; i < s.length; i++) {
+			if (!value.equals(s[i])) {
+				sbr.append(s[i]);
+				sbr.append(",");
+			} else if (value.equals(s[i])) {
+				isIn = true;
+			}
+		}
+		String result = sbr.toString();
+		stringArray = new StringBuffer(result);
+		return isIn ? value : null;
+	}
+
+	public void push(String content) {
+		if (content == null) {
+			stringArray = null;
+		} else {
+			stringArray = new StringBuffer(content);
+		}
+	}
+
+	public void pushAll(int content) {
+		pushAll(String.valueOf(content));
+	}
+
+	public void pushAll(String content) {
+		if (content != null) {
+			stringArray.append(content);
+			stringArray.append(",");
+		}
+	}
+
+	public boolean include(String value) {
+		return include(this.stringArray.toString(), value);
+	}
+
+	public boolean include(int value) {
+		return include(this.stringArray.toString(), value);
+	}
+
+	public static boolean include(String content, int value) {
+		return include(content, String.valueOf(value));
+	}
+
+	public static boolean include(String content, String value) {
+		String[] s = content.split(",");
+		for (int i = 0; i < s.length; i++) {
+			if (value.equals(s[i])) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public int getSize() {
+		String s[] = stringArray.toString().split(",");
+		return s.length;
+	}
+
+}
